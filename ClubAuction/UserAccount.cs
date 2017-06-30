@@ -10,6 +10,6 @@ namespace ClubAuction
     {
         public int isSuccess { get; set; }
         public IList<UserAccountList> userAcctInfoList { get; set; }
-        public string userID { get; set; }
+        //public string userID { get; set; }
     }
 }

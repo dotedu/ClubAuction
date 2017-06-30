@@ -27,6 +27,8 @@ namespace ClubAuction
         string Referer = "https://hwid1.vmall.com/CAS/portal/loginAuth.html?lang=zh-cn&validated=true&service=http%3A%2F%2Fclub.huawei.com%2Fplugin.php%3Fid%3Dhwlogin%3Avalidate%26ru%3Dhttp%253A%252F%252Fclub.huawei.com%252Fauction.html&loginChannel=22000000&reqClientType=22&adUrl=https%3A%2F%2Fclub.huawei.com%2Fsource%2Fplugin%2Fhwlogin%2Flogin.php";
         string callbcakURL { get; set; }
 
+
+        string replayurl { get; set; }
         private static Random rd = new Random();
         double Random_DT = rd.NextDouble();
 
@@ -46,15 +48,20 @@ namespace ClubAuction
         public Action<string[]> OnAddListItem;
         public Action OnEexchangeSuccess;
         public Action OnEexchangeOver;
+        public Action OnReplaySuccess;
+        public Action OnRateSuccess;
+        public Action OnRateFail;
 
+        long times;
+        public long PostTime=0;
 
 
 
         public void Run()
         {
-            Debug.Write("获取pageToken");
-            getpageToken();
-            OnSetLocalInfo?.Invoke();
+            //Debug.Write("获取pageToken");
+            //getpageToken();
+            //OnSetLocalInfo?.Invoke();
 
 
             Debug.Write("生成验证码");
@@ -98,7 +105,7 @@ namespace ClubAuction
                 string[] strArray = item.Split(new char[] { ':' }, 2);
                 DicLocalinfo.Add(strArray[0], strArray[1].Replace("\"", ""));
             }
-            Debug.Write(DicLocalinfo["pageToken"]);
+            //Debug.Write(DicLocalinfo["pageToken"]);
             foreach (var item in response.Cookies)
             {
                 Debug.Write(item.Name + ":" + item.Value);
@@ -120,7 +127,7 @@ namespace ClubAuction
 
             client.UserAgent = UserAgent;
             IRestResponse response = client.Execute(request);
-            Debug.Write(GetTimeStamp(DateTime.Now)- GetTimeStamp(Convert.ToDateTime(response.Headers[5].Value)));
+            Debug.Write(GetTimeStamp(DateTime.Now)- GetTimeStamp(Convert.ToDateTime(response.Headers[1].Value)));
             MemoryStream ms = new MemoryStream(response.RawBytes);
             Image image = Image.FromStream(ms);
             return image;
@@ -144,13 +151,13 @@ namespace ClubAuction
             request.AddHeader("origin", "https://hwid1.vmall.com");
 
             request.AddParameter("reqClientType", 22);
-            request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
+            //request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
             request.AddParameter("userAccount", userAccount);
             try
             {
 
                 IRestResponse response = client.Execute(request);
-                Debug.Write(GetTimeStamp(DateTime.Now) - GetTimeStamp(Convert.ToDateTime(response.Headers[5].Value)));
+                Debug.Write(GetTimeStamp(DateTime.Now) - GetTimeStamp(Convert.ToDateTime(response.Headers[1].Value)));
                 var resultJS = JsonConvert.DeserializeObject<IDictionary<string, object>>(response.Content);
                 Debug.Write(response.Content);
                 if (resultJS.ContainsKey("existAccountFlag"))
@@ -236,8 +243,8 @@ namespace ClubAuction
             request.AddHeader("origin", "https://hwid1.vmall.com");
             request.AddParameter("userAccount", userAccount);
             request.AddParameter("reqClientType", 22);
-            request.AddParameter("isGetAll", 0);
-            request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
+            request.AddParameter("operType", 3);
+            //request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
 
             try
             {
@@ -271,7 +278,7 @@ namespace ClubAuction
             request.AddHeader("referer", Referer);
             request.AddHeader("origin", "https://hwid1.vmall.com");
             request.AddParameter("session_code_key", "login_session_ramdom_code_key");
-            request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
+            //request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
             request.AddParameter("randomCode", authcode);
             try
             {
@@ -305,7 +312,7 @@ namespace ClubAuction
 
         public void login(string userAccount, string password, string authcode, string twoStepVerifyCode, string verifyAccountType, string verifyUserAccount)
         {
-            Debug.Write(DicLocalinfo["pageToken"]);
+            //Debug.Write(DicLocalinfo["pageToken"]);
             var client = new RestClient("https://hwid1.vmall.com/CAS/ajaxHandler/remoteLogin?reflushCode=0.6837099514074068");
             client.UserAgent = UserAgent;
             client.CookieContainer = mCookieContainer;
@@ -326,7 +333,7 @@ namespace ClubAuction
             request.AddParameter("userAccount", userAccount);
             request.AddParameter("password", password);
             request.AddParameter("authcode", authcode);
-            request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
+            //request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
             request.AddParameter("quickAuth", "false");
             request.AddParameter("newsign", "");
             request.AddParameter("isThirdBind", 0);
@@ -378,7 +385,7 @@ namespace ClubAuction
         }
 
 
-        public void getAuthCode(int verifyAccountType, string verifyUserAccount, string userAccount, string userID)
+        public void getAuthCode(int verifyAccountType, string verifyUserAccount, string userAccount)
         {
 
             Uri url = (verifyAccountType == 1 || verifyAccountType == 5) ? new Uri("https://hwid1.vmall.com/CAS/ajaxHandler/getEMailAuthCode?reflushCode=" + Random_DT) : new Uri("https://hwid1.vmall.com/CAS/ajaxHandler/getSMSAuthCode?reflushCode=" + Random_DT);
@@ -392,22 +399,21 @@ namespace ClubAuction
             request.AddHeader("origin", "https://hwid1.vmall.com");
 
             request.AddParameter("reqClientType", 22);
-            request.AddParameter("operType", 2);
+            request.AddParameter("operType", 8);
             request.AddParameter("siteID", 1);
             request.AddParameter("languageCode", "zh-cn");
-            request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
+            request.AddParameter("userAccount", userAccount);
+            //request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
 
             if (verifyAccountType == 1 || verifyAccountType == 5)
             {
                 request.AddParameter("accountType", 1);
-                request.AddParameter("userID", userID);
                 request.AddParameter("emailReqType", 6);
                 request.AddParameter("email", verifyUserAccount);
             }
             else
             {
                 request.AddParameter("accountType", 2);
-                request.AddParameter("userAccount", userAccount);
                 request.AddParameter("smsReqType", 6);
                 request.AddParameter("mobilePhone", verifyUserAccount);
 
@@ -528,13 +534,14 @@ namespace ClubAuction
 
                     list[0] = Auction1.DocumentNode.SelectSingleNode("//h2").InnerText;
                     list[1] = Auction1.DocumentNode.SelectSingleNode("//p[@class='hb-count']").InnerText.Replace(" ","");
-                    list[2] = Auction1.DocumentNode.SelectSingleNode("//input").Attributes["id"].Value;
+                    var s1 = subitem.Attributes["href"].Value;
+                    list[2] = subitem.Attributes["href"].Value.Substring(39);
                     var Detail = getDetail(list[2]);
 
                     list[3] = Detail[0];
 
                     list[4] = Detail[1];
-                    list[5] = GetTime(Auction1.DocumentNode.SelectSingleNode("//input").Attributes["value"].Value).ToString();
+                    list[5] = Detail[2];
 
 
                     OnAddListItem?.Invoke(list);
@@ -585,13 +592,13 @@ namespace ClubAuction
 
                     list[0] = Auction1.DocumentNode.SelectSingleNode("//h2").InnerText;
                     list[1] = Auction1.DocumentNode.SelectSingleNode("//p[@class='hb-count']").InnerText.Replace(" ", "");
-                    list[2] = Auction1.DocumentNode.SelectSingleNode("//input").Attributes["id"].Value;
+                    list[2] = subitem.Attributes["href"].Value.Substring(39);
                     var Detail = getDetail(list[2]);
 
                     list[3] = Detail[0];
 
                     list[4] = Detail[1];
-                    list[5] = GetTime(Auction1.DocumentNode.SelectSingleNode("//input").Attributes["value"].Value).ToString();
+                    list[5] = Detail[2];
 
 
                     OnAddListItem?.Invoke(list);
@@ -630,14 +637,16 @@ namespace ClubAuction
                 var detTable = new HtmlDocument();
                 detTable.LoadHtml(dettable.OuterHtml);
                 HtmlNode starttime= detTable.DocumentNode.SelectSingleNode("//table//tr[3]//td[1]");
+                HtmlNode endtime = detTable.DocumentNode.SelectSingleNode("//table//tr[4]//td[1]");
 
                 HtmlNode detdetail = doc.DocumentNode.SelectSingleNode("//div[@class='det-detail']");
                 var detDetail = new HtmlDocument();
                 detDetail.LoadHtml(detdetail.OuterHtml);
                 HtmlNode giftstaus = detDetail.DocumentNode.SelectSingleNode("//div//a[1]");
-                var arr = new string[2];
+                var arr = new string[3];
                 arr[0] = giftstaus.InnerText;
                 arr[1]= starttime.InnerText.Replace("开始时间 : ", "");
+                arr[2] = endtime.InnerText.Replace("结束时间 : ", "");
                 return arr;
             }
             catch (Exception e)
@@ -677,13 +686,14 @@ namespace ClubAuction
 
                     list[0] = subitem.Attributes["title"].Value;
                     list[1] = Auction.DocumentNode.SelectSingleNode("//p[@class='now-price']").InnerText;
-                    list[2] = Auction.DocumentNode.SelectSingleNode("//input").Attributes["id"].Value.Replace("auc_","");
+                    var s1 = subitem.Attributes["href"].Value;
+                    list[2] = GetValue(subitem.Attributes["href"].Value,"thread-","-");
                     var Detail = getDetail(list[2]);
 
                     list[3] = Detail[0];
 
                     list[4] = Detail[1];
-                    list[5] = GetTime(Auction.DocumentNode.SelectSingleNode("//input").Attributes["value"].Value).ToString();
+                    list[5] = Detail[2];
 
 
                     OnAddListItem?.Invoke(list);
@@ -698,9 +708,9 @@ namespace ClubAuction
 
         }
 
-        public void Eexchange(string index,string aucid,string realname, string mobile, string address, string remark)
+        public void Eexchange(string index,string aucid, string starttime, string realname, string mobile, string address, string remark)
         {
-            Uri url = new Uri("http://club.huawei.com/plugin.php?id=auction:involve&operation=join&tid=" + aucid);
+            Uri url = new Uri("https://club.huawei.com/plugin.php?id=auction:involve&operation=join&tid=" + aucid);
             var client = new RestClient(url);
             client.CookieContainer = mCookieContainer;
             client.UserAgent = MobileUserAgent;
@@ -714,34 +724,55 @@ namespace ClubAuction
             request.AddParameter("auc_reply_message", remark);
             request.AddParameter("formhash", LoginResult.formhash);
             request.AddParameter("confirmsubmit", "确认兑换");
-            try
+            var t1 = GetRemoteTime();
+            Debug.Write(t1);
+            Debug.Write(GetTime(t1.ToString()));
+            
+            var t2 = GetTimeStamp(Convert.ToDateTime(starttime)) > PostTime ? GetTimeStamp(Convert.ToDateTime(starttime)) : PostTime;
+            if (t1 >= t2)
             {
-                IRestResponse response = client.Execute(request);
-                Debug.Write(GetTimeStamp(DateTime.Now) - GetTimeStamp(Convert.ToDateTime(response.Headers[6].Value)));
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(response.Content);
+                //Debug.Write(GetTimeStamp(DateTime.Now));
+                //Debug.Write(GetTimeStamp(Convert.ToDateTime(starttime)));
 
-
-                var MessageText = doc.DocumentNode.SelectSingleNode("//p[@class='mp-t']").InnerText;
-                if (MessageText.Contains("交易已经结束"))
+                //Delay(3200);
+                Delay(2400 - Convert.ToInt32(t1 + times - GetTimeStamp(Convert.ToDateTime(starttime))));
+                //Debug.Write(GetTimeStamp(DateTime.Now));
+                try
                 {
-                    MessageText = "已结束";
-                }
-                string[] arr = new string[2];
-                arr[0] = index;
-                arr[1] = MessageText;
-                OnEexchange?.Invoke(arr);
+                    IRestResponse response = client.Execute(request);
+                    PostTime = GetTimeStamp(DateTime.Now);
+                    //Debug.Write(GetTimeStamp(DateTime.Now) - GetTimeStamp(Convert.ToDateTime(response.Headers[1].Value)));
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(response.Content);
 
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
+
+                    var MessageText = doc.DocumentNode.SelectSingleNode("//p[@class='mp-t']").InnerText;
+                    if (MessageText.Contains("交易已经结束"))
+                    {
+                        MessageText = "已结束";
+                    }
+                    if (MessageText.Contains("成功"))
+                    {
+                        OnEexchangeSuccess?.Invoke();
+
+                    }
+
+                    string[] arr = new string[2];
+                    arr[0] = index;
+                    arr[1] = MessageText;
+                    OnEexchange?.Invoke(arr);
+
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e);
+                }
             }
         }
 
-        public void EexchangebyId(string aucid, string realname, string mobile, string address, string remark)
+        public void EexchangebyId(string aucid,string starttime, string realname, string mobile, string address, string remark)
         {
-            Uri url = new Uri("http://club.huawei.com/plugin.php?id=auction:involve&operation=join&tid=" + aucid);
+            Uri url = new Uri("https://club.huawei.com/plugin.php?id=auction:involve&operation=join&tid=" + aucid);
             var client = new RestClient(url);
             client.CookieContainer = mCookieContainer;
             client.UserAgent = MobileUserAgent;
@@ -755,28 +786,41 @@ namespace ClubAuction
             request.AddParameter("auc_reply_message", remark);
             request.AddParameter("formhash", LoginResult.formhash);
             request.AddParameter("confirmsubmit", "确认兑换");
-            try
+            var t1 = GetRemoteTime();
+            var t2 = GetTimeStamp(Convert.ToDateTime(starttime)) > PostTime ? GetTimeStamp(Convert.ToDateTime(starttime)) : PostTime;
+            if (t1 >= t2)
             {
-                IRestResponse response = client.Execute(request);
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(response.Content);
+                //Debug.Write(GetTimeStamp(DateTime.Now));
 
+                Delay(3200- Convert.ToInt32( t1 - GetTimeStamp(Convert.ToDateTime(starttime))));
+                //Debug.Write(GetTimeStamp(DateTime.Now));
 
-                var MessageText = doc.DocumentNode.SelectSingleNode("//p[@class='mp-t']").InnerText;
-                if (MessageText.Contains("交易已经结束"))
+                try
                 {
-                    OnEexchangeOver?.Invoke();
+
+                    IRestResponse response = client.Execute(request);
+                    PostTime = GetTimeStamp(DateTime.Now);
+
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(response.Content);
+
+
+                    var MessageText = doc.DocumentNode.SelectSingleNode("//p[@class='mp-t']").InnerText;
+                    if (MessageText.Contains("交易已经结束"))
+                    {
+                        OnEexchangeOver?.Invoke();
+                    }
+                    if (MessageText.Contains("成功"))
+                    {
+                        OnEexchangeSuccess?.Invoke();
+
+                    }
+
                 }
-                if (MessageText.Contains("成功"))
+                catch (Exception e)
                 {
-                    OnEexchangeSuccess?.Invoke();
-
+                    Debug.WriteLine(e);
                 }
-
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
             }
         }
 
@@ -801,6 +845,146 @@ namespace ClubAuction
 
         }
 
+        public void Reply(string uid, string ReplyStr)
+        {
+            GetReplyUrl(uid);
+
+            var client = new RestClient(replayurl);
+            client.CookieContainer = mCookieContainer;
+            client.UserAgent = MobileUserAgent;
+            var request = new RestRequest(Method.POST);
+
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+
+            request.AddParameter("message", ReplyStr);
+            request.AddParameter("formhash", LoginResult.formhash);
+            try
+            {
+                IRestResponse response = client.Execute(request);
+                var result = response.Content;
+                Debug.Write(result);
+                if (result.Contains("发布成功"))
+                {
+                    OnReplaySuccess?.Invoke(); 
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+        }
+
+        private void GetReplyUrl(string uid)
+        {
+            var client = new RestClient("http://club.huawei.com/forum.php?mod=viewthread&tid=" + uid);
+            client.CookieContainer = mCookieContainer;
+            //client.FollowRedirects = false;
+            client.ClearHandlers();
+            client.UserAgent = MobileUserAgent;
+            var request = new RestRequest(Method.GET);
+            try
+            {
+                IRestResponse response = client.Execute(request);
+                var result = response.Content;
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(result);
+
+                HtmlNode postform = doc.DocumentNode.SelectSingleNode("//form[@id='fastpostform']");
+                HtmlAttributeCollection attrs = postform.Attributes;
+                foreach (var item in attrs)
+                {
+                    if (item.Name.Contains("action"))
+                    {
+                        replayurl = "http://club.huawei.com/" + item.Value.Replace("&amp;", "&") + "&handlekey=fastpost&loc=1&inajax=1";
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+
+
+        }
+
+
+        public void Rate(string tid, string score1, string score3, string score5, string reason)
+        {
+            var pid = GetPid(tid);
+
+            var client = new RestClient("http://club.huawei.com/forum.php?mod=misc&action=rate&ratesubmit=yes&infloat=yes&inajax=1");
+            client.CookieContainer = mCookieContainer;
+            client.UserAgent = UserAgent;
+            var request = new RestRequest(Method.POST);
+
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+
+            request.AddParameter("formhash", LoginResult.formhash);
+            request.AddParameter("tid", tid);
+            request.AddParameter("pid", pid);
+            request.AddParameter("referer", "http://club.huawei.com/forum.php?mod=viewthread&tid=" + tid + "&page=0#pid" + pid);
+            request.AddParameter("handlekey", "rate");
+            request.AddParameter("score1", score1);
+            request.AddParameter("score3", score3);
+            request.AddParameter("score5", score5);
+            request.AddParameter("reason", reason);
+
+            try
+            {
+                IRestResponse response = client.Execute(request);
+                var result = response.Content;
+                Debug.Write(result);
+                if (result.Contains("感谢"))
+                {
+                    OnRateSuccess?.Invoke();
+                }
+                else if (result.Contains("限制"))
+                {
+                    OnRateFail?.Invoke();
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+        }
+        private string GetPid(string uid)
+        {
+            var client = new RestClient("http://club.huawei.com/thread-" + uid + "-1-1.html");
+            client.CookieContainer = mCookieContainer;
+            //client.FollowRedirects = false;
+            client.ClearHandlers();
+            client.UserAgent = UserAgent;
+            var request = new RestRequest(Method.GET);
+            try
+            {
+                IRestResponse response = client.Execute(request);
+                var result = response.Content;
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(result);
+
+                HtmlNode postform = doc.DocumentNode.SelectSingleNode("//a[@id='ak_rate']");
+
+                var str = postform.OuterHtml;
+                var pattern = @"pid=\d+";
+                Regex r = new Regex(pattern, RegexOptions.IgnoreCase);
+                Match m = r.Match(str);
+                return m.ToString().Replace("pid=", "");
+
+            }
+            catch (Exception e)
+            {
+
+                Debug.WriteLine(e);
+                return "";
+            }
+
+
+        }
 
         public void heartbeat()
         {
@@ -830,17 +1014,21 @@ namespace ClubAuction
             client.CookieContainer = mCookieContainer;
             client.UserAgent = UserAgent;
             var request = new RestRequest(Method.GET);
+            //Debug.Write(GetTimeStamp(DateTime.Now));
 
+            
             try
             {
                 IRestResponse response = client.Execute(request);
+                var t3 = GetTimeStamp(DateTime.Now);
+                //Debug.Write(GetTimeStamp(DateTime.Now));
 
                 foreach (var item in response.Headers)
                 {
                     if (item.Name=="Date")
                     {
                         var t2 = GetTimeStamp(Convert.ToDateTime(item.Value));
-                        var t3 = GetTimeStamp(DateTime.Now);
+                        //Debug.Write(t2);
                         return t1 + (t3 - t1) / 2 - t2;
                     }
                 }
@@ -853,8 +1041,44 @@ namespace ClubAuction
             }
             return 0;
         }
+
+        public long GetRemoteTime()
+        {
+            var client = new RestClient("http://club.huawei.com/plugin.php?id=auction");
+            client.CookieContainer = mCookieContainer;
+            client.UserAgent = UserAgent;
+            var request = new RestRequest(Method.GET);
+
+            try
+            {
+
+                var t1 = GetTimeStamp(DateTime.Now);
+                IRestResponse response = client.Execute(request);
+
+                times = (GetTimeStamp(DateTime.Now)- t1)/2;
+                foreach (var item in response.Headers)
+                {
+                    if (item.Name == "Date")
+                    {
+                        var t2 = GetTimeStamp(Convert.ToDateTime(item.Value));
+                        //Debug.Write(t2);
+                        return t2;
+                    }
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
+            return 0;
+        }
+
+
         private static string GetValue(string str, string s, string e)
         {
+            
             var rg = new Regex("(?<=(" + s + "))[.\\s\\S]*?(?=(" + e + "))", RegexOptions.Multiline | RegexOptions.Singleline);
             return rg.Match(str).Value;
         }
@@ -873,7 +1097,7 @@ namespace ClubAuction
         public DateTime GetTime(string timeStamp)
         {
             DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-            long lTime = long.Parse(timeStamp + "0000000");
+            long lTime = long.Parse(timeStamp + "0000");
             TimeSpan toNow = new TimeSpan(lTime);
             return dtStart.Add(toNow);
         }
@@ -884,5 +1108,15 @@ namespace ClubAuction
             return (int)(time - startTime).TotalSeconds;
         }
 
+        public void Delay(int mm)
+        {
+            DateTime current = DateTime.Now;
+
+            while (current.AddMilliseconds(mm) > DateTime.Now)
+            {
+                System.Windows.Forms.Application.DoEvents();
+            }
+            return;
+        }
     }
 }

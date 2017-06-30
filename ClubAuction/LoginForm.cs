@@ -133,7 +133,16 @@ namespace ClubAuction
                 }
                 else
                 {
-                    MessageBox.Show("错误：" + LoginResult.errorDesc + "\r\n错误代码：" + LoginResult.errorCode);
+                    if (LoginResult.errorCode== "10000400")
+                    {
+                        MessageBox.Show("错误：" + LoginResult.errorDesc + "\r\n错误代码：" + LoginResult.errorCode + "\r\n密码错误！！");
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("错误：" + LoginResult.errorDesc + "\r\n错误代码：" + LoginResult.errorCode);
+
+                    }
 
                 }
             }
@@ -155,6 +164,10 @@ namespace ClubAuction
             }));
         }
 
-
+        private long GetTimeStamp(DateTime dateTime)
+        {
+            DateTime dt1970 = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return (dateTime.Ticks - dt1970.Ticks) / 10000;
+        }
     }
 }

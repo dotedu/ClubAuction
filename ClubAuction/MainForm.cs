@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,14 @@ namespace ClubAuction
         int count = 0;
         int heartbeat;
 
+        int AutoExchange = 0;
+        int AutoExchanging = 0;
+
+        public static Version ApplicationVersion = new Version(Application.ProductVersion);
+        string AppVersion = ApplicationVersion.ToString();
+
+        int GiftListCount = 0; 
+
         public MainForm()
         {
             InitializeComponent();
@@ -31,6 +40,7 @@ namespace ClubAuction
         private const string ContactsFileName = "contacts.cfg";
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this.Text = "花粉俱乐部辅助工具 - "+ AppVersion;
             heartbeat = 100;
             StartTimePicker.Value = DateTime.Now;
 
@@ -89,10 +99,26 @@ namespace ClubAuction
 
         private void ManualBtn_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(GiftID.Text) || GiftList.CheckedItems.Count > 0)
-            {
+            //Debug.Write(AutoExchanging);
+            //Debug.Write(AutoExchange);
 
+
+            if (!string.IsNullOrEmpty(GiftID.Text) || GiftListCount > 0)
+            {
+                if (AutoExchange == 1 && AutoExchanging == 0)
+                {
+                    AutoExchanging = 1;
+                    timer.Start();
+                }
+                else if (AutoExchange == 1 && AutoExchanging == 1)
+                {
+                    AutoExchanging = 0;
+
+                }
+                else
+                {
                     exchange();
+                }
 
             }
             else
@@ -108,6 +134,66 @@ namespace ClubAuction
                 JsonConvert.SerializeObject(contacts, Formatting.Indented));
 
 
+        }
+
+        private void AutomaticBtn_Click(object sender, EventArgs e)
+        {
+            var time = DateTimeToStamp(StartTimePicker.Value) - DateTimeToStamp(DateTime.Now);
+            if (!string.IsNullOrEmpty(GiftID.Text) || GiftListCount > 0)
+            {
+                if (timeLeft == 0 && time >= 0)
+                {
+                    timeLeft = time;
+                    timer.Start();
+                    AutomaticBtn.Text = "停止计时";
+                }
+                else
+                {
+                    timer.Stop();
+                    timeLeft = 0;
+                    AutomaticBtn.Text = "自动兑换";
+                }
+            }
+            else
+            {
+                MessageBox.Show("未选择兑换商品");
+            }
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            if (AutoExchanging == 1)
+            {
+                exchange();
+                ManualBtn.Text = "兑换中";
+
+
+            }
+            else
+            {
+                timer.Stop();
+                ManualBtn.Text = "兑换";
+
+            }
+
+        }
+        private void RetryNum_Tick(object sender, EventArgs e)
+        {
+            if (count > 0)
+            {
+                AutomaticBtn.Text = "兑换中";
+                count = count - 1;
+
+                exchange();
+
+            }
+            else
+            {
+                RetryNum.Stop();
+                AutomaticBtn.Text = "自动兑换";
+                label8.Text = "停止中";
+
+            }
         }
 
         private void MoreBtn_Click(object sender, EventArgs e)
@@ -252,65 +338,6 @@ namespace ClubAuction
             return options;
         }
 
-        private void AutomaticBtn_Click(object sender, EventArgs e)
-        {
-            var time= DateTimeToStamp(StartTimePicker.Value) - DateTimeToStamp(DateTime.Now);
-            if (!string.IsNullOrEmpty(GiftID.Text)|| GiftList.CheckedItems.Count > 0)
-            {
-                if (timeLeft == 0 && time>=0)
-                {
-                    timeLeft = time;
-                    timer.Start();
-                    AutomaticBtn.Text = "停止计时";
-                }
-                else
-                {
-                    timer.Stop();
-                    timeLeft = 0;
-                    AutomaticBtn.Text = "自动兑换";
-                }
-            }
-            else
-            {
-                MessageBox.Show("未选择兑换商品");
-            }
-        }
-
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            if (timeLeft > 0)
-            {
-                timeLeft = timeLeft - 1;
-                label8.Text = "倒 计 时："+formatLongToTimeStr(timeLeft);
-            }
-            else
-            {
-                timer.Stop();
-                RetryNum.Start();
-                count = Convert.ToInt32(TryNum.Value);
-            }
-
-        }
-        private void RetryNum_Tick(object sender, EventArgs e)
-        {
-            if (count>0)
-            {
-                AutomaticBtn.Text = "兑换中";
-                count = count - 1;
-                label8.Text = "抢购次数："+(TryNum.Value- count);
-
-                    exchange();
-
-            }
-            else
-            {
-                RetryNum.Stop();
-                AutomaticBtn.Text = "自动兑换";
-                label8.Text = "停止中";
-
-            }
-        }
-
         private int DateTimeToStamp(DateTime time)
         {
             System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
@@ -361,51 +388,156 @@ namespace ClubAuction
         {
             if (!string.IsNullOrEmpty(GiftID.Text))
             {
-                var parameter1 = new string[6];
-                parameter1[0] = GiftID.Text;
-                parameter1[1] = realname.Text;
-                parameter1[2] = mobile.Text;
-                parameter1[3] = Address.Text;
-                parameter1[4] = Remark.Text;
+                if (GiftID.Text.Contains("-"))
+                {
+                    var t1 = Convert.ToInt32(sArray2(GiftID.Text)[0]);
+                    var t2 = Convert.ToInt32(sArray2(GiftID.Text)[1]);
+                    for (int i = t1; i < t2; i++)
+                    {
+                        var parameter1 = new string[7];
+                        parameter1[0] = i.ToString();
+                        parameter1[1] = Program.api.getDetail(i.ToString())[1];
+                        parameter1[2] = realname.Text;
+                        parameter1[3] = mobile.Text;
+                        parameter1[4] = Address.Text;
+                        parameter1[5] = Remark.Text;
 
-                Program.api.OnEexchangeSuccess = () => {
-                    RunInMainthread(() => {
-                        MessageBox.Show("兑换成功");
-                    });
-                };
-                Program.api.OnEexchangeOver = () => {
-                    RunInMainthread(() => {
-                        MessageBox.Show("已经结束");
-                    });
-                };
-                RunAsync((para) => {
-                    var s1 = (para[0]);
-                    var s2 = (para[1]);
-                    var s3 = (para[2]);
-                    var s4 = (para[3]);
-                    var s5 = (para[4]);
+                        Program.api.OnEexchangeSuccess = () => {
+                            RunInMainthread(() => {
+                                //MessageBox.Show("兑换成功");
+                                Program.api.getAccountInfo();
+                                MoneyNum.Text = AccountInfo.MoneyNum;
 
-                    Program.api.EexchangebyId(s1, s2, s3, s4, s5);
+                            });
+                        };
+                        Program.api.OnEexchangeOver = () => {
+                            RunInMainthread(() => {
+                                MessageBox.Show("已经结束");
+                            });
+                        };
+                        RunAsync((para) => {
+                            var s1 = (para[0]);
+                            var s2 = (para[1]);
+                            var s3 = (para[2]);
+                            var s4 = (para[3]);
+                            var s5 = (para[4]);
+                            var s6 = (para[5]);
 
-                }, parameter1);
+                            Program.api.EexchangebyId(s1, s2, s3, s4, s5, s6);
+
+                        }, parameter1);
+                    }
+                }
+                else if (GiftID.Text.Contains(","))
+                {
+                    foreach (var item in sArray1(GiftID.Text))
+                    {
+                        var parameter1 = new string[7];
+                        parameter1[0] = item;
+                        parameter1[1] = Program.api.getDetail(item)[1];
+                        parameter1[2] = realname.Text;
+                        parameter1[3] = mobile.Text;
+                        parameter1[4] = Address.Text;
+                        parameter1[5] = Remark.Text;
+
+                        Program.api.OnEexchangeSuccess = () => {
+                            RunInMainthread(() => {
+                                //MessageBox.Show("兑换成功");
+                                Program.api.getAccountInfo();
+                                MoneyNum.Text = AccountInfo.MoneyNum;
+
+                            });
+                        };
+                        Program.api.OnEexchangeOver = () => {
+                            RunInMainthread(() => {
+                                MessageBox.Show("已经结束");
+                            });
+                        };
+                        RunAsync((para) => {
+                            var s1 = (para[0]);
+                            var s2 = (para[1]);
+                            var s3 = (para[2]);
+                            var s4 = (para[3]);
+                            var s5 = (para[4]);
+                            var s6 = (para[5]);
+
+                            Program.api.EexchangebyId(s1, s2, s3, s4, s5, s6);
+
+                        }, parameter1);
+                    }
+                }
+                else
+                {
+                    var parameter1 = new string[7];
+                    parameter1[0] = GiftID.Text;
+                    parameter1[1] = Program.api.getDetail(GiftID.Text)[1];
+                    parameter1[2] = realname.Text;
+                    parameter1[3] = mobile.Text;
+                    parameter1[4] = Address.Text;
+                    parameter1[5] = Remark.Text;
+
+                    Program.api.OnEexchangeSuccess = () => {
+                        RunInMainthread(() => {
+                            MessageBox.Show("兑换成功");
+                            Program.api.getAccountInfo();
+                            MoneyNum.Text = AccountInfo.MoneyNum;
+
+                        });
+                    };
+                    Program.api.OnEexchangeOver = () => {
+                        RunInMainthread(() => {
+                            MessageBox.Show("已经结束");
+                        });
+                    };
+                    RunAsync((para) => {
+                        var s1 = (para[0]);
+                        var s2 = (para[1]);
+                        var s3 = (para[2]);
+                        var s4 = (para[3]);
+                        var s5 = (para[4]);
+                        var s6 = (para[5]);
+
+                        Program.api.EexchangebyId(s1, s2, s3, s4, s5, s6);
+
+                    }, parameter1);
+                }
+                
 
 
             }
 
 
-            if (GiftList.CheckedItems.Count > 0)
+            if (GiftListCount > 0)
             {
-                for (int i = 0; i < this.GiftList.CheckedItems.Count; i++)
+                //GiftList.CheckedItems[0].SubItems[2].Text
+                //GiftList.Sort();
+
+
+                for (int i = 0; i < this.GiftListCount; i++)
                 {
                     if (this.GiftList.CheckedItems[i].Checked)
                     {
-                        var parameter = new string[6];
+                        var parameter = new string[7];
                         parameter[0] = i.ToString();
                         parameter[1] = GiftList.CheckedItems[i].SubItems[2].Text;
-                        parameter[2] = realname.Text;
-                        parameter[3] = mobile.Text;
-                        parameter[4] = Address.Text;
-                        parameter[5] = Remark.Text;
+                        parameter[2] = GiftList.CheckedItems[i].SubItems[4].Text;
+                        parameter[3] = realname.Text;
+                        parameter[4] = mobile.Text;
+                        parameter[5] = Address.Text;
+                        parameter[6] = Remark.Text;
+
+                        Program.api.OnEexchangeSuccess = () => {
+                            RunInMainthread(() => {
+                                if (GiftListCount==1)
+                                {
+                                    MessageBox.Show("兑换成功");
+
+                                }
+                                Program.api.getAccountInfo();
+                                MoneyNum.Text = AccountInfo.MoneyNum;
+
+                            });
+                        };
 
 
                         Program.api.OnEexchange = (arr) => {
@@ -421,16 +553,41 @@ namespace ClubAuction
                             var s3 = (para[3]);
                             var s4 = (para[4]);
                             var s5 = (para[5]);
+                            var s6 = (para[6]);
 
-                            Program.api.Eexchange(s0,s1, s2, s3, s4, s5);
+                            Program.api.Eexchange(s0,s1, s2, s3, s4, s5, s6);
 
                         }, parameter);
 
                     }
+                    //Delay(3000);
+                    Debug.Write(i);
+
                 }
             }
         }
 
+
+        public void Delay(int mm)
+        {
+            DateTime current = DateTime.Now;
+
+            while (current.AddMilliseconds(mm) > DateTime.Now)
+            {
+                Application.DoEvents();
+            }
+            return;
+        }
+        private string[] sArray1(string GiftText)
+        {
+            var t = GiftText.Split(',');
+            return t;
+        }
+        private string[] sArray2(string GiftText)
+        {
+            var t = GiftText.Split('-');
+            return t;
+        }
         private void Heartbeat_Tick(object sender, EventArgs e)
         {
             if (heartbeat > 0)
@@ -451,6 +608,7 @@ namespace ClubAuction
         {
             var t1 = GetTimeStamp(DateTime.Now);
             ErrorTime.Text = "误差约为：" + Program.api.checktime(t1) + "ms";
+            //label9.Text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt");
         }
 
         private long GetTimeStamp(DateTime dateTime)
@@ -458,7 +616,71 @@ namespace ClubAuction
             DateTime dt1970 = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return (dateTime.Ticks - dt1970.Ticks) / 10000;
         }
+        private DateTime GetTime(string timeStamp)
+        {
+            DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            long lTime = long.Parse(timeStamp + "0000000");
+            TimeSpan toNow = new TimeSpan(lTime);
+            return dtStart.Add(toNow);
+        }
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                AutoExchange = 1;
+            }
+            else
+            {
+                AutoExchange = 0;
+                AutoExchanging = 0;
 
+            }
+        }
+
+        private void GiftList_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            GiftListCount = GiftList.CheckedItems.Count;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            label9.Visible = false;
+            Program.api.OnReplaySuccess = () => {
+                RunInMainthread(() => {
+                    label9.Visible = true;
+                });
+            };
+
+            var ReplyStr = ReplayText.Text;
+            if (!string.IsNullOrEmpty(ReplayText.Text)&& !string.IsNullOrEmpty(UidText.Text))
+            {
+                Program.api.Reply(UidText.Text, ReplayText.Text);
+
+            }
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+            
+            Program.api.OnRateSuccess = () => {
+                RunInMainthread(() => {
+                    MessageBox.Show("评分成功");
+                });
+            };
+            Program.api.OnRateFail = () => {
+                RunInMainthread(() => {
+                    MessageBox.Show("24小时评分超过限制");
+                });
+            };
+            
+            if (!string.IsNullOrEmpty(Score1.Text) && !string.IsNullOrEmpty(Score3.Text) && !string.IsNullOrEmpty(Score5.Text) && !string.IsNullOrEmpty(UidText.Text))
+            {
+                Program.api.Rate(UidText.Text, Score1.Text, Score3.Text, Score5.Text, ReasonStr.Text);
+
+            }
+        }
     }
 
 }

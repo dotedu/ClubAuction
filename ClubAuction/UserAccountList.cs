@@ -10,8 +10,8 @@ namespace ClubAuction
     {
         public int accountState { get; set; }
         public int accountType { get; set; }
-        public int accountValidStatus { get; set; }
-        public string updateTime { get; set; }
+        //public int accountValidStatus { get; set; }
+        //public string updateTime { get; set; }
         public string userAccount { get; set; }
     }
 }

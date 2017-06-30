@@ -112,7 +112,7 @@ namespace ClubAuction
 
         private void getAuthCodeBtn_Click(object sender, EventArgs e)
         {
-            Program.api.getAuthCode(Convert.ToInt32(AccountList.SelectedValue), AccountList.Text, UserAccount, UserAccountList.userID);
+            Program.api.getAuthCode(Convert.ToInt32(AccountList.SelectedValue), AccountList.Text, UserAccount);
             timeLeft = 60;
             getAuthCodeBtn.Enabled = false;
             VerifyTimer.Start();
