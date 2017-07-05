@@ -13,7 +13,8 @@ namespace ClubAuction
         public static bool Signedin { get; set; } = false;
         public static string Avatar { get; set; }
 
-        
+        public static string UserUid { get; set; }
+
 
     }
 }

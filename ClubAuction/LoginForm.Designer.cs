@@ -69,10 +69,10 @@
             // btnLogin
             // 
             this.btnLogin.Enabled = false;
-            this.btnLogin.Location = new System.Drawing.Point(161, 131);
+            this.btnLogin.Location = new System.Drawing.Point(76, 126);
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(75, 23);
-            this.btnLogin.TabIndex = 8;
+            this.btnLogin.TabIndex = 12;
             this.btnLogin.Text = "登录";
             this.btnLogin.UseVisualStyleBackColor = true;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
@@ -80,11 +80,11 @@
             // RandomCodeImg
             // 
             this.RandomCodeImg.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.RandomCodeImg.Location = new System.Drawing.Point(176, 88);
+            this.RandomCodeImg.Location = new System.Drawing.Point(164, 85);
             this.RandomCodeImg.Name = "RandomCodeImg";
-            this.RandomCodeImg.Size = new System.Drawing.Size(60, 30);
+            this.RandomCodeImg.Size = new System.Drawing.Size(72, 36);
             this.RandomCodeImg.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.RandomCodeImg.TabIndex = 11;
+            this.RandomCodeImg.TabIndex = 8;
             this.RandomCodeImg.TabStop = false;
             this.RandomCodeImg.Click += new System.EventHandler(this.RandomCodeImg_Click);
             // 
@@ -93,8 +93,8 @@
             this.AuthCode.Location = new System.Drawing.Point(76, 93);
             this.AuthCode.MaxLength = 4;
             this.AuthCode.Name = "AuthCode";
-            this.AuthCode.Size = new System.Drawing.Size(94, 21);
-            this.AuthCode.TabIndex = 12;
+            this.AuthCode.Size = new System.Drawing.Size(82, 21);
+            this.AuthCode.TabIndex = 11;
             this.AuthCode.TextChanged += new System.EventHandler(this.AuthCode_TextChanged);
             // 
             // Password

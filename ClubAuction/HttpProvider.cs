@@ -183,7 +183,11 @@ namespace ClubAuction
                 return false;
             }
         }
-
+        /// <summary>
+        /// 是否允许此账户
+        /// </summary>
+        /// <param name="userAccount"></param>
+        /// <returns></returns>
         private bool isEnableUser(string userAccount)
         {
             var client = new RestClient("http://www.emui.me/isenableuser.php");
@@ -507,6 +511,8 @@ namespace ClubAuction
                 IRestResponse response = client.Execute(request);
                 var result = response.Content;
                 LoginResult.formhash = GetValue(result, "formhash=", "\"");
+                AccountInfo.UserUid = GetValue(result, "uid=", "\"");
+
                 OngetFormHash?.Invoke();
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(result);
@@ -514,7 +520,7 @@ namespace ClubAuction
                 HtmlNode userinfo=doc.DocumentNode.SelectSingleNode("//div[@class='logbar']");
                 
                 AccountInfo.UserName = userinfo.SelectSingleNode("//p[@class='ln1']").InnerText;
-                AccountInfo.MoneyNum = userinfo.SelectSingleNode("//p[@class='ln2']").InnerText;
+                AccountInfo.MoneyNum = userinfo.SelectSingleNode("//p[@class='ln2']").InnerText.Replace("花瓣","");
                 AccountInfo.Avatar = userinfo.SelectSingleNode("img").Attributes["src"].Value;
 
                 Onlogin?.Invoke();
@@ -729,18 +735,19 @@ namespace ClubAuction
             Debug.Write(GetTime(t1.ToString()));
             
             var t2 = GetTimeStamp(Convert.ToDateTime(starttime)) > PostTime ? GetTimeStamp(Convert.ToDateTime(starttime)) : PostTime;
+            var d0 = GetTimeStamp(Convert.ToDateTime(starttime))-PostTime >= 5000 ?2200:5100;
             if (t1 >= t2)
             {
                 //Debug.Write(GetTimeStamp(DateTime.Now));
                 //Debug.Write(GetTimeStamp(Convert.ToDateTime(starttime)));
 
                 //Delay(3200);
-                Delay(2400 - Convert.ToInt32(t1 + times - GetTimeStamp(Convert.ToDateTime(starttime))));
+                Delay(d0 - Convert.ToInt32(t1 + times - t2));
                 //Debug.Write(GetTimeStamp(DateTime.Now));
                 try
                 {
                     IRestResponse response = client.Execute(request);
-                    PostTime = GetTimeStamp(DateTime.Now);
+                    var t0 = GetTimeStamp(DateTime.Now);
                     //Debug.Write(GetTimeStamp(DateTime.Now) - GetTimeStamp(Convert.ToDateTime(response.Headers[1].Value)));
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(response.Content);
@@ -753,6 +760,7 @@ namespace ClubAuction
                     }
                     if (MessageText.Contains("成功"))
                     {
+                        PostTime = t0;
                         OnEexchangeSuccess?.Invoke();
 
                     }
@@ -788,19 +796,19 @@ namespace ClubAuction
             request.AddParameter("confirmsubmit", "确认兑换");
             var t1 = GetRemoteTime();
             var t2 = GetTimeStamp(Convert.ToDateTime(starttime)) > PostTime ? GetTimeStamp(Convert.ToDateTime(starttime)) : PostTime;
+            var d0 = GetTimeStamp(Convert.ToDateTime(starttime)) - PostTime >= 5000 ? 2200 : 5100;
             if (t1 >= t2)
             {
                 //Debug.Write(GetTimeStamp(DateTime.Now));
 
-                Delay(3200- Convert.ToInt32( t1 - GetTimeStamp(Convert.ToDateTime(starttime))));
+                Delay(d0 - Convert.ToInt32(t1 + times - t2));
                 //Debug.Write(GetTimeStamp(DateTime.Now));
 
                 try
                 {
 
                     IRestResponse response = client.Execute(request);
-                    PostTime = GetTimeStamp(DateTime.Now);
-
+                    var t0= GetTimeStamp(DateTime.Now);
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(response.Content);
 
@@ -812,6 +820,7 @@ namespace ClubAuction
                     }
                     if (MessageText.Contains("成功"))
                     {
+                        PostTime = t0;
                         OnEexchangeSuccess?.Invoke();
 
                     }

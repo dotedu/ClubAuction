@@ -51,6 +51,7 @@
             this.Userinfo = new System.Windows.Forms.GroupBox();
             this.formhash = new System.Windows.Forms.Label();
             this.ContactGroupBox = new System.Windows.Forms.GroupBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.GiftID = new System.Windows.Forms.TextBox();
             this.ManualBtn = new System.Windows.Forms.Button();
@@ -72,22 +73,23 @@
             this.RetryNum = new System.Windows.Forms.Timer(this.components);
             this.Heartbeat = new System.Windows.Forms.Timer(this.components);
             this.GroupBox1 = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.ReplayText = new System.Windows.Forms.TextBox();
-            this.label11 = new System.Windows.Forms.Label();
-            this.UidText = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.Score5 = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.Score3 = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
-            this.Score1 = new System.Windows.Forms.TextBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.label9 = new System.Windows.Forms.Label();
             this.ReasonStr = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.UidText = new System.Windows.Forms.TextBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.ReplayText = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.Score5 = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.Score1 = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.Score3 = new System.Windows.Forms.TextBox();
+            this.UserGroup = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.Avatar)).BeginInit();
             this.Gifts.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PageNum)).BeginInit();
@@ -130,11 +132,13 @@
             // MoneyNum
             // 
             this.MoneyNum.AutoSize = true;
-            this.MoneyNum.Location = new System.Drawing.Point(60, 56);
+            this.MoneyNum.Font = new System.Drawing.Font("微软雅黑", 9.75F);
+            this.MoneyNum.Location = new System.Drawing.Point(114, 49);
             this.MoneyNum.Name = "MoneyNum";
-            this.MoneyNum.Size = new System.Drawing.Size(47, 12);
+            this.MoneyNum.Size = new System.Drawing.Size(17, 19);
             this.MoneyNum.TabIndex = 3;
-            this.MoneyNum.Text = "花瓣： ";
+            this.MoneyNum.Text = "0";
+            this.MoneyNum.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Gifts
             // 
@@ -281,6 +285,8 @@
             // 
             // Userinfo
             // 
+            this.Userinfo.Controls.Add(this.label16);
+            this.Userinfo.Controls.Add(this.UserGroup);
             this.Userinfo.Controls.Add(this.Avatar);
             this.Userinfo.Controls.Add(this.UserName);
             this.Userinfo.Controls.Add(this.MoneyNum);
@@ -321,6 +327,17 @@
             this.ContactGroupBox.TabIndex = 6;
             this.ContactGroupBox.TabStop = false;
             this.ContactGroupBox.Text = "联系方式";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(484, 21);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(48, 16);
+            this.checkBox1.TabIndex = 10;
+            this.checkBox1.Text = "自动";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // label5
             // 
@@ -517,6 +534,33 @@
             this.GroupBox1.TabStop = false;
             this.GroupBox1.Text = "帖子管理";
             // 
+            // ReasonStr
+            // 
+            this.ReasonStr.Location = new System.Drawing.Point(355, 45);
+            this.ReasonStr.Name = "ReasonStr";
+            this.ReasonStr.Size = new System.Drawing.Size(157, 21);
+            this.ReasonStr.TabIndex = 14;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(314, 49);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(35, 12);
+            this.label13.TabIndex = 13;
+            this.label13.Text = "理由:";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.ForeColor = System.Drawing.Color.Red;
+            this.label9.Location = new System.Drawing.Point(518, 127);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(65, 12);
+            this.label9.TabIndex = 12;
+            this.label9.Text = "回复成功！";
+            this.label9.Visible = false;
+            // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(519, 151);
@@ -526,6 +570,23 @@
             this.button1.Text = "回复";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // UidText
+            // 
+            this.UidText.Location = new System.Drawing.Point(64, 18);
+            this.UidText.Name = "UidText";
+            this.UidText.Size = new System.Drawing.Size(530, 21);
+            this.UidText.TabIndex = 1;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(519, 44);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "点评";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // ReplayText
             // 
@@ -544,12 +605,13 @@
             this.label11.TabIndex = 2;
             this.label11.Text = "回复内容:";
             // 
-            // UidText
+            // Score5
             // 
-            this.UidText.Location = new System.Drawing.Point(64, 18);
-            this.UidText.Name = "UidText";
-            this.UidText.Size = new System.Drawing.Size(530, 21);
-            this.UidText.TabIndex = 1;
+            this.Score5.Location = new System.Drawing.Point(257, 45);
+            this.Score5.Name = "Score5";
+            this.Score5.Size = new System.Drawing.Size(45, 21);
+            this.Score5.TabIndex = 11;
+            this.Score5.Text = "0";
             // 
             // label10
             // 
@@ -560,13 +622,13 @@
             this.label10.TabIndex = 0;
             this.label10.Text = "帖子 ID:";
             // 
-            // Score5
+            // Score1
             // 
-            this.Score5.Location = new System.Drawing.Point(257, 45);
-            this.Score5.Name = "Score5";
-            this.Score5.Size = new System.Drawing.Size(45, 21);
-            this.Score5.TabIndex = 11;
-            this.Score5.Text = "0";
+            this.Score1.Location = new System.Drawing.Point(64, 45);
+            this.Score1.Name = "Score1";
+            this.Score1.Size = new System.Drawing.Size(45, 21);
+            this.Score1.TabIndex = 3;
+            this.Score1.Text = "0";
             // 
             // label15
             // 
@@ -577,13 +639,14 @@
             this.label15.TabIndex = 10;
             this.label15.Text = "花瓣:";
             // 
-            // Score3
+            // label12
             // 
-            this.Score3.Location = new System.Drawing.Point(159, 45);
-            this.Score3.Name = "Score3";
-            this.Score3.Size = new System.Drawing.Size(45, 21);
-            this.Score3.TabIndex = 6;
-            this.Score3.Text = "0";
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(7, 49);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(53, 12);
+            this.label12.TabIndex = 2;
+            this.label12.Text = "人   气:";
             // 
             // label14
             // 
@@ -594,70 +657,37 @@
             this.label14.TabIndex = 5;
             this.label14.Text = "威望:";
             // 
-            // button2
+            // Score3
             // 
-            this.button2.Location = new System.Drawing.Point(519, 44);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "点评";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.Score3.Location = new System.Drawing.Point(159, 45);
+            this.Score3.Name = "Score3";
+            this.Score3.Size = new System.Drawing.Size(45, 21);
+            this.Score3.TabIndex = 6;
+            this.Score3.Text = "0";
             // 
-            // Score1
+            // UserGroup
             // 
-            this.Score1.Location = new System.Drawing.Point(64, 45);
-            this.Score1.Name = "Score1";
-            this.Score1.Size = new System.Drawing.Size(45, 21);
-            this.Score1.TabIndex = 3;
-            this.Score1.Text = "0";
+            this.UserGroup.AutoSize = true;
+            this.UserGroup.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.UserGroup.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.UserGroup.Location = new System.Drawing.Point(214, 27);
+            this.UserGroup.Name = "UserGroup";
+            this.UserGroup.Size = new System.Drawing.Size(51, 19);
+            this.UserGroup.TabIndex = 4;
+            this.UserGroup.Text = "用户组";
+            this.UserGroup.Visible = false;
             // 
-            // label12
+            // label16
             // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(7, 49);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(53, 12);
-            this.label12.TabIndex = 2;
-            this.label12.Text = "人   气:";
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(484, 21);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(48, 16);
-            this.checkBox1.TabIndex = 10;
-            this.checkBox1.Text = "自动";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.ForeColor = System.Drawing.Color.Red;
-            this.label9.Location = new System.Drawing.Point(518, 127);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(65, 12);
-            this.label9.TabIndex = 12;
-            this.label9.Text = "回复成功！";
-            this.label9.Visible = false;
-            // 
-            // ReasonStr
-            // 
-            this.ReasonStr.Location = new System.Drawing.Point(355, 45);
-            this.ReasonStr.Name = "ReasonStr";
-            this.ReasonStr.Size = new System.Drawing.Size(157, 21);
-            this.ReasonStr.TabIndex = 14;
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(314, 49);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(35, 12);
-            this.label13.TabIndex = 13;
-            this.label13.Text = "理由:";
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("微软雅黑", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label16.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.label16.Location = new System.Drawing.Point(60, 49);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(48, 19);
+            this.label16.TabIndex = 5;
+            this.label16.Text = "花瓣：";
+            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // MainForm
             // 
@@ -755,6 +785,8 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox ReasonStr;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label UserGroup;
     }
 }
 
