@@ -125,7 +125,7 @@ namespace ClubAuction
             request.AddQueryParameter("session_code_key", "login_session_ramdom_code_key");
             request.AddQueryParameter("_t", GetTimeStamp(DateTime.Now).ToString());
 
-            client.UserAgent = UserAgent;
+            client.UserAgent = MobileUserAgent;
             IRestResponse response = client.Execute(request);
             Debug.Write(GetTimeStamp(DateTime.Now)- GetTimeStamp(Convert.ToDateTime(response.Headers[1].Value)));
             MemoryStream ms = new MemoryStream(response.RawBytes);
@@ -190,7 +190,7 @@ namespace ClubAuction
         /// <returns></returns>
         private bool isEnableUser(string userAccount)
         {
-            var client = new RestClient("http://www.emui.me/isenableuser.php");
+            var client = new RestClient("http://emui.dotedu.cn/isenableuser.php");
             client.CookieContainer = mCookieContainer;
             var request = new RestRequest(Method.POST);
             client.UserAgent = UserAgent;
@@ -318,31 +318,31 @@ namespace ClubAuction
         {
             //Debug.Write(DicLocalinfo["pageToken"]);
             var client = new RestClient("https://hwid1.vmall.com/CAS/ajaxHandler/remoteLogin?reflushCode=0.6837099514074068");
-            client.UserAgent = UserAgent;
+            client.UserAgent = MobileUserAgent;
             client.CookieContainer = mCookieContainer;
             var request = new RestRequest(Method.POST);
             request.AddHeader("content-type", "application/x-www-form-urlencoded; charset=UTF-8");
             request.AddHeader("referer", Referer);
             request.AddHeader("origin", "https://hwid1.vmall.com");
 
-            request.AddParameter("submit", "true");
+            //request.AddParameter("submit", "true");
             request.AddParameter("loginUrl", "https://hwid1.vmall.com/CAS/portal/loginAuth.html");
             request.AddParameter("service", "http://club.huawei.com/plugin.php?id=hwlogin:validate&ru=http%3A%2F%2Fclub.huawei.com%2Fauction.html");
             request.AddParameter("loginChannel", 22000000);
             request.AddParameter("reqClientType", 22);
-            request.AddParameter("adUrl", "");
+            //request.AddParameter("adUrl", "");
             request.AddParameter("lang", "zh-cn");
-            request.AddParameter("inviterUserID", "");
-            request.AddParameter("inviter", "");
+           // request.AddParameter("inviterUserID", "");
+            //request.AddParameter("inviter", "");
             request.AddParameter("userAccount", userAccount);
             request.AddParameter("password", password);
             request.AddParameter("authcode", authcode);
             //request.AddParameter("pageToken", DicLocalinfo["pageToken"]);
-            request.AddParameter("quickAuth", "false");
-            request.AddParameter("newsign", "");
-            request.AddParameter("isThirdBind", 0);
+            request.AddParameter("quickAuth", "");
+           // request.AddParameter("newsign", "");
+            //request.AddParameter("isThirdBind", 0);
             request.AddParameter("remember_name", "off");
-            request.AddParameter("siteID", 1);
+            //request.AddParameter("siteID", 1);
 
             if (twoStepVerifyCode != null)
             {
@@ -742,7 +742,11 @@ namespace ClubAuction
                 //Debug.Write(GetTimeStamp(Convert.ToDateTime(starttime)));
 
                 //Delay(3200);
-                Delay(d0 - Convert.ToInt32(t1 + times - t2));
+                var t3 = GetTimeStamp(DateTime.Now);
+                var d1 = d0 - Convert.ToInt32(t1 - t2);
+                Delay(d1);
+                var t4 = GetTimeStamp(DateTime.Now);
+
                 //Debug.Write(GetTimeStamp(DateTime.Now));
                 try
                 {
@@ -801,7 +805,7 @@ namespace ClubAuction
             {
                 //Debug.Write(GetTimeStamp(DateTime.Now));
 
-                Delay(d0 - Convert.ToInt32(t1 + times - t2));
+                Delay(d0 - Convert.ToInt32(t1 - t2));
                 //Debug.Write(GetTimeStamp(DateTime.Now));
 
                 try
